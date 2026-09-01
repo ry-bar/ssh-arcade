@@ -6,24 +6,10 @@ import (
 	"os"
 
 	tea "charm.land/bubbletea/v2"
+	//"charm.land/lipgloss/v2"
 
 	"github.com/ry-bar/ascii-run/internal/games/snake"
 )
-
-
-// Basic implementation of a tea.Model interface
-// Init() tea.Cmd
-// Update(tea.Msg) (tea.Model, tea.Cmd)
-// View() string
-
-func returnMainMenu(m model) tea.Msg {
-
-	m.activeGame = nil
-	m.currentScreen = menuScreen
-
-	return m
-}
-
 
 
 type model struct {
@@ -32,6 +18,7 @@ type model struct {
 	cursorLocation int
 
 	activeGame tea.Model
+	quitting bool
 }
 
 type screen int
@@ -49,6 +36,7 @@ func initialModel() model{
 		cursorLocation: 0,
 
 		activeGame: nil,
+		quitting: false,
 	}
 }
 
@@ -58,10 +46,25 @@ func (m model) Init() tea.Cmd {
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
+	
 	if m.currentScreen == snakeScreen {
+		switch msg := msg.(type){
+			case tea.KeyPressMsg:
+				switch(msg.String()) {
+					case "m":
+						// This will pull the screen back to the mainMenu screen
+						m.currentScreen = menuScreen
+						m.activeGame = nil
+						return m, tea.ClearScreen
+				}
+
+		}
+
+		// If "m" isn't pressed then it throws
+		//  whatever was sent back to the snake.go
+		//  Update() funciton.
 		updatedGame, cmd := m.activeGame.Update(msg)
 		m.activeGame = updatedGame
-
 		return m, cmd	
 	}
 
@@ -85,7 +88,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 							return m, m.activeGame.Init()
 						}
 					case "q", "ctrl+c":
-						return m, tea.Quit
+						m.quitting = true
+						return m, tea.Sequence(tea.ClearScreen, tea.Quit)
 				
 				}
 		}
@@ -96,8 +100,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() tea.View {
 	s := ""
+	if m.quitting == true {
+		return tea.NewView("")
+	}
 
-	if m.currentScreen == snakeScreen {
+	if m.currentScreen != menuScreen {
+		
 		return m.activeGame.View()
 	}
 

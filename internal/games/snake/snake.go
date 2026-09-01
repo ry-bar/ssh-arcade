@@ -3,12 +3,19 @@
 package snake
 
 import (
-	"strings"
-//  "fmt"
+	//"strings"
+	//  "fmt"
 
-  tea "charm.land/bubbletea/v2"
+	tea "charm.land/bubbletea/v2"
+  "charm.land/lipgloss/v2"	
+
 )
 
+var style = lipgloss.NewStyle().
+		Width(40).
+		Height(20).
+		BorderStyle(lipgloss.ASCIIBorder()).
+		BorderForeground(lipgloss.Color("#04B575"))
 
 type point struct {
 	x int
@@ -38,14 +45,6 @@ type model struct {
 }
 
 
-type stopGame string
-
-
-func stop() tea.Msg {
-	return stopGame("stop")
-}
-
-
 func New() model {
 	return model{
 		width: 40,
@@ -65,49 +64,27 @@ func New() model {
 
 
 func (m model) Init() tea.Cmd {
-	// Maybe this is where I would gather the user data that's needed for the game?
 	return nil
 }
 
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-
-	switch msg := msg.(type) {
-		case tea.KeyPressMsg:
-			switch msg.String() {
-				case "q", "crtl+c":
-					return m, tea.Quit
-			}
-
-	}
+	// This will take the commands that are passed through the main.go
+	//	Update() function if it's not the "m" button.
  
 	return m, nil
 }
 
 
-
-//TODO: This function is hella broken
 func (m model) View() tea.View{
+	s := ""
 
-	s := strings.Repeat("-", m.width) + "\n"
+	if m.gameOver == false {
+		styleString := style.Render()
+		return tea.NewView(styleString)
 
-
-	internalWidth := m.width - 2
-	if internalWidth < 0 {
-		internalWidth = 0
 	}
 
-	internalHeight := m.height - 2
-	if internalHeight < 0 {
-		internalHeight = 0
-	}
-
-
-	for i := 0; i < internalHeight; i++ {
-		s += "|" + strings.Repeat(" ", internalWidth) + "|\n"
-	}
-
-	s += strings.Repeat("-", m.width)
 	
 
 	return tea.NewView(s)
