@@ -83,7 +83,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					case "enter", "space":
 						if m.cursorLocation == 1 {
 							m.currentScreen = snakeScreen
-							m.activeGame = snake.New()
+							m.activeGame = snake.New(30, 60)
 
 							return m, m.activeGame.Init()
 						}

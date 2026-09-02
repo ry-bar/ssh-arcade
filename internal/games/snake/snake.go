@@ -11,11 +11,9 @@ import (
 
 )
 
-var style = lipgloss.NewStyle().
-		Width(40).
-		Height(20).
-		BorderStyle(lipgloss.ASCIIBorder()).
-		BorderForeground(lipgloss.Color("#04B575"))
+
+
+
 
 type point struct {
 	x int
@@ -32,8 +30,10 @@ const (
 )
 
 type model struct {
-	width int
-	height int
+	boardWidth int
+	boardHeight int
+
+	border lipgloss.Style
 
 	snake []point
 	food point
@@ -45,10 +45,12 @@ type model struct {
 }
 
 
-func New() model {
+func New(boardHeight int, boardWidth int ) model {
 	return model{
-		width: 40,
-		height: 20,
+
+		boardHeight: boardHeight,
+		boardWidth: boardWidth,
+
 
 		snake: []point{
 			{x:12,y:12},
@@ -77,16 +79,33 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 
 func (m model) View() tea.View{
-	s := ""
+	gameBoard := ""
 
 	if m.gameOver == false {
-		styleString := style.Render()
-		return tea.NewView(styleString)
+		// This loads the boarder and puts the head of the snake
+		// 	into the first spot, but I'm trying to get it to start
+		// 	in the middle of the board.
+		gameContent := lipgloss.NewStyle().
+				Width(m.boardWidth).
+				Height(m.boardHeight).
+				BorderStyle(lipgloss.ASCIIBorder()).
+				BorderForeground(lipgloss.Color("#04B575")).
+				Render("O")
+
+		gameBoard = lipgloss.Place(
+			m.boardWidth,
+			m.boardHeight,
+			lipgloss.Center,
+			lipgloss.Center,
+			gameContent,
+		)
+
+		return tea.NewView(gameBoard)
 
 	}
 
 	
 
-	return tea.NewView(s)
+	return tea.NewView(gameBoard)
 }
 
